@@ -192,6 +192,7 @@
     <div class="month-control">
       <select id="monthSelect"></select>
       <button class="btn" id="showKeyBtn">Minha chave</button>
+      <button class="btn" id="switchKeyBtn">Trocar chave</button>
       <button class="btn" id="exportBtn">Exportar backup</button>
     </div>
   </div>
@@ -351,8 +352,10 @@ function randomKey(len=28){
 }
 
 // ---------- Firestore: sincronização em tempo real ----------
+let unsubscribeFn = null;
 function subscribeData(){
-  db.collection('workspaces').doc(workspaceKey).onSnapshot(snap=>{
+  if(unsubscribeFn){ unsubscribeFn(); unsubscribeFn=null; }
+  unsubscribeFn = db.collection('workspaces').doc(workspaceKey).onSnapshot(snap=>{
     const data = snap.data() || {};
     transactions = data.transactions || [];
     recorrentes = data.recorrentes || [];
@@ -644,6 +647,19 @@ document.getElementById('showKeyBtn').addEventListener('click', ()=>{
 });
 
 document.getElementById('monthSelect').addEventListener('change', render);
+
+document.getElementById('switchKeyBtn').addEventListener('click', ()=>{
+  const ok = confirm('Trocar de chave? Você vai sair da base de dados atual e poderá entrar com outra chave (ou gerar uma nova).');
+  if(!ok) return;
+  if(unsubscribeFn){ unsubscribeFn(); unsubscribeFn=null; }
+  localStorage.removeItem('lc_workspace_key');
+  workspaceKey = null;
+  transactions = [];
+  recorrentes = [];
+  document.getElementById('newKeyDisplay').value = randomKey();
+  document.getElementById('existingKeyInput').value = '';
+  document.getElementById('gateOverlay').style.display = 'flex';
+});
 
 document.getElementById('copyKeyBtn').addEventListener('click', ()=>{
   navigator.clipboard.writeText(document.getElementById('newKeyDisplay').value);
