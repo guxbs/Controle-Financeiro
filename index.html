@@ -303,6 +303,8 @@
           <span id="editBannerText">Editando lançamento</span>
           <a id="cancelEditLink">Cancelar edição</a>
         </div>
+        <label class="checkline hide" id="fApplyFutureCheckline"><input type="checkbox" id="fApplyFuture" checked> Aplicar essa mudança a partir deste mês em diante (todos os futuros dessa recorrência)</label>
+        <label class="checkline hide" id="fPromoteCheckline"><input type="checkbox" id="fPromote"> Transformar em recorrente a partir deste mês (gera os próximos 24 meses)</label>
         <div class="form-row">
           <div><label>Data</label><input type="date" id="fData"></div>
           <div><label>Valor por parcela (R$)</label><input type="number" id="fValor" step="0.01" placeholder="0,00"></div>
@@ -569,6 +571,21 @@ function gerarParcelas({data, descricao, categoria, tipo, valor, natureza, parce
   }
   return out;
 }
+const RECORRENTE_MESES_ADIANTE = 24; // horizonte de materialização automática
+function gerarRecorrentes({data, descricao, categoria, tipo, valor, natureza}){
+  const recId = genId();
+  const out = [];
+  for(let i=0; i<RECORRENTE_MESES_ADIANTE; i++){
+    out.push({
+      id: genId(),
+      data: shiftDate(data, i),
+      descricao, categoria, tipo, natureza: natureza || 'pessoal',
+      valor: Math.abs(Number(valor)),
+      recorrenteRef: recId
+    });
+  }
+  return {recId, novasTransacoes: out};
+}
 
 function populateMonthSelect(){
   const sel = document.getElementById('monthSelect');
@@ -654,9 +671,10 @@ function render(){
     items.forEach(t=>{ running += t.tipo==='receita'?Number(t.valor):-Number(t.valor); runningMap[t.id]=running; });
     ledgerBody.innerHTML = filtered.map(t=>{
       const parcelaTag = t.parcela ? `<span class="tag mini">${t.parcela.atual}/${t.parcela.total}</span>` : '';
+      const recTag = t.recorrenteRef ? `<span class="tag mini">recorrente</span>` : '';
       return `<tr>
         <td class="num">${t.data.split('-').reverse().join('/')}</td>
-        <td>${t.descricao}${parcelaTag}</td>
+        <td>${t.descricao}${parcelaTag}${recTag}</td>
         <td><span class="tag">${t.categoria}</span></td>
         <td><span class="tag">${t.natureza==='profissional'?'Profissional':'Pessoal'}</span></td>
         <td class="${t.tipo==='receita'?'pos':'neg'}">${t.tipo==='receita'?'Receita':'Despesa'}</td>
@@ -705,6 +723,21 @@ function startEdit(id){
   const banner = document.getElementById('editBanner');
   banner.classList.remove('hide');
   document.getElementById('editBannerText').textContent = 'Editando lançamento de ' + t.data.split('-').reverse().join('/') + (t.parcela ? ' (parte de um parcelamento — só esta linha será alterada)' : '');
+
+  const applyFutureLine = document.getElementById('fApplyFutureCheckline');
+  const promoteLine = document.getElementById('fPromoteCheckline');
+  if(t.recorrenteRef){
+    applyFutureLine.classList.remove('hide');
+    document.getElementById('fApplyFuture').checked = true;
+    promoteLine.classList.add('hide');
+  } else if(!t.parcela){
+    promoteLine.classList.remove('hide');
+    document.getElementById('fPromote').checked = false;
+    applyFutureLine.classList.add('hide');
+  } else {
+    applyFutureLine.classList.add('hide');
+    promoteLine.classList.add('hide');
+  }
   document.querySelector('.panel h3').scrollIntoView({behavior:'smooth', block:'center'});
 }
 function cancelEdit(){
@@ -717,6 +750,10 @@ function cancelEdit(){
   document.getElementById('recorrenteCheckline').classList.remove('hide');
   document.getElementById('addBtn').textContent = 'Adicionar';
   document.getElementById('editBanner').classList.add('hide');
+  document.getElementById('fApplyFutureCheckline').classList.add('hide');
+  document.getElementById('fPromoteCheckline').classList.add('hide');
+  document.getElementById('fApplyFuture').checked = true;
+  document.getElementById('fPromote').checked = false;
 }
 document.getElementById('cancelEditLink').addEventListener('click', cancelEdit);
 
@@ -735,9 +772,14 @@ function renderRecurringList(){
     </div>`).join('');
   list.querySelectorAll('.del').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
-      recorrentes = recorrentes.filter(r=>r.id!==btn.dataset.id);
+      const recId = btn.dataset.id;
+      const ok = confirm('Remover essa recorrência? Os lançamentos futuros dela serão cancelados, mas o histórico já ocorrido continua no seu extrato.');
+      if(!ok) return;
+      recorrentes = recorrentes.filter(r=>r.id!==recId);
+      const currentKey = new Date().toISOString().slice(0,7);
+      transactions = transactions.filter(t=> !(t.recorrenteRef===recId && monthKey(t.data) > currentKey));
       await persist();
-      showToast('Recorrência removida.');
+      showToast('Recorrência removida — futuro cancelado, histórico mantido.');
     });
   });
 }
@@ -903,9 +945,41 @@ document.getElementById('addBtn').addEventListener('click', async ()=>{
 
   if(editingId){
     const idx = transactions.findIndex(t=>t.id===editingId);
-    if(idx>=0){
-      transactions[idx] = {...transactions[idx], data, descricao, categoria, tipo, natureza, valor:Math.abs(valor)};
+    if(idx<0){ cancelEdit(); return; }
+    const orig = transactions[idx];
+    const applyFuture = orig.recorrenteRef && document.getElementById('fApplyFuture').checked;
+    const promote = !orig.parcela && !orig.recorrenteRef && document.getElementById('fPromote').checked;
+
+    if(applyFuture){
+      const recId = orig.recorrenteRef;
+      const fromKey = monthKey(orig.data);
+      transactions.forEach(t=>{
+        if(t.recorrenteRef===recId && monthKey(t.data) >= fromKey){
+          t.descricao = descricao; t.categoria = categoria; t.tipo = tipo; t.natureza = natureza; t.valor = Math.abs(valor);
+        }
+      });
+      const thisIdx = transactions.findIndex(t=>t.id===editingId);
+      if(thisIdx>=0) transactions[thisIdx].data = data;
+      const recTemplate = recorrentes.find(r=>r.id===recId);
+      if(recTemplate){ recTemplate.descricao=descricao; recTemplate.categoria=categoria; recTemplate.tipo=tipo; recTemplate.natureza=natureza; recTemplate.valor=Math.abs(valor); }
+      await persist();
+      cancelEdit();
+      showToast('Recorrência atualizada a partir de ' + monthLabel(fromKey) + '.');
+      return;
     }
+
+    if(promote){
+      transactions.splice(idx,1);
+      const {recId, novasTransacoes} = gerarRecorrentes({data, descricao, categoria, tipo, valor, natureza});
+      transactions.push(...novasTransacoes);
+      recorrentes.push({id:recId, descricao, categoria, tipo, valor:Math.abs(valor), natureza});
+      await persist();
+      cancelEdit();
+      showToast('Lançamento transformado em recorrente a partir de ' + data.split('-').reverse().join('/') + '.');
+      return;
+    }
+
+    transactions[idx] = {...transactions[idx], data, descricao, categoria, tipo, natureza, valor:Math.abs(valor)};
     await persist();
     cancelEdit();
     showToast('Lançamento atualizado.');
@@ -920,17 +994,20 @@ document.getElementById('addBtn').addEventListener('click', async ()=>{
     const parcelaAtual = parseInt(document.getElementById('fParcelaAtual').value, 10) || 1;
     if(!parcelas || parcelas < 2 || parcelaAtual > parcelas){ showToast('Confira o número de parcelas.'); return; }
     transactions.push(...gerarParcelas({data, descricao, categoria, tipo, valor, natureza, parcelas, parcelaAtual}));
+  } else if(recorrente){
+    const {recId, novasTransacoes} = gerarRecorrentes({data, descricao, categoria, tipo, valor, natureza});
+    transactions.push(...novasTransacoes);
+    recorrentes.push({id:recId, descricao, categoria, tipo, valor:Math.abs(valor), natureza});
   } else {
     transactions.push({id:genId(), data, descricao, categoria, tipo, natureza, valor:Math.abs(valor)});
   }
-  if(recorrente){ recorrentes.push({id:genId(), descricao, categoria, tipo, valor:Math.abs(valor)}); }
   await persist();
 
   document.getElementById('fValor').value=''; document.getElementById('fDesc').value='';
   document.getElementById('fParcelado').checked=false; document.getElementById('fRecorrente').checked=false;
   document.getElementById('parceladoField').classList.remove('show');
   document.getElementById('monthSelect').value = monthKey(data);
-  showToast('Lançamento adicionado.');
+  showToast(recorrente ? 'Recorrência criada — lançamentos gerados pros próximos 24 meses.' : 'Lançamento adicionado.');
 });
 
 // ---------- importação com proteção contra duplicidade ----------
