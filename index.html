@@ -262,23 +262,6 @@
     </div>
 
     <div class="section">
-      <h3>Orçamento por categoria</h3>
-      <div class="desc">Defina um teto mensal opcional por categoria. A barra mostra o gasto do mês selecionado.</div>
-      <div id="budgetsList"></div>
-    </div>
-
-    <div class="section">
-      <h3>Meta de reserva</h3>
-      <div class="desc">Progresso do seu saldo acumulado em relação a uma meta de reserva/poupança.</div>
-      <div class="goal-row">
-        <label style="font-size:12px;color:var(--ink-dim);">Meta (R$)</label>
-        <input type="number" id="metaInput" step="100" placeholder="Ex: 20000">
-      </div>
-      <div class="progress-bar-track"><div class="progress-bar-fill" id="metaFill" style="width:0%;background:var(--olive);"></div></div>
-      <div class="desc" id="metaText" style="margin-top:8px;margin-bottom:0;"></div>
-    </div>
-
-    <div class="section">
       <h3>Lançamentos do mês</h3>
       <div class="filter-bar">
         <input type="text" id="filterSearch" placeholder="Buscar por descrição...">
@@ -455,6 +438,15 @@ function catColor(name){
   let hash=0; for(let i=0;i<name.length;i++) hash += name.charCodeAt(i);
   return CAT_COLORS[hash % CAT_COLORS.length];
 }
+function tripCatColor(name){
+  const idx = TRIP_CATS.indexOf(name);
+  if(idx>=0) return TRIP_COLORS[idx];
+  let hash=0; for(let i=0;i<name.length;i++) hash += name.charCodeAt(i);
+  return TRIP_COLORS[hash % TRIP_COLORS.length];
+}
+function tagStyle(color){
+  return `style="background:${color}26;border-color:${color}80;color:${color};font-weight:600;"`;
+}
 function fmt(n){ return (n<0?'- ':'') + 'R$ ' + Math.abs(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function monthKey(dateStr){ return dateStr.slice(0,7); }
 function monthLabel(key){
@@ -504,7 +496,6 @@ function subscribeData(){
     viagens = data.viagens || [];
     renderCategorySelects();
     populateMonthSelect();
-    document.getElementById('metaInput').value = metaReserva || '';
     render();
     renderViagens();
   }, err=>{
@@ -675,7 +666,7 @@ function render(){
       return `<tr>
         <td class="num">${t.data.split('-').reverse().join('/')}</td>
         <td>${t.descricao}${parcelaTag}${recTag}</td>
-        <td><span class="tag">${t.categoria}</span></td>
+        <td><span class="tag" ${tagStyle(catColor(t.categoria))}>${t.categoria}</span></td>
         <td><span class="tag">${t.natureza==='profissional'?'Profissional':'Pessoal'}</span></td>
         <td class="${t.tipo==='receita'?'pos':'neg'}">${t.tipo==='receita'?'Receita':'Despesa'}</td>
         <td class="right num ${t.tipo==='receita'?'pos':'neg'}">${t.tipo==='receita'?'+':'-'} ${fmt(Number(t.valor))}</td>
@@ -695,13 +686,11 @@ function render(){
     });
   }
 
-  renderRecurringList();
-  renderForecast(key);
-  renderPrevistoRealizado(key);
-  renderBudgets(key);
-  renderMeta();
-  renderCatChart(items.filter(t=>t.tipo==='despesa'));
-  renderTrendChart(last6, key);
+  try{ renderCatChart(items.filter(t=>t.tipo==='despesa')); }catch(e){ console.error('Erro no gráfico de categorias:', e); }
+  try{ renderTrendChart(last6, key); }catch(e){ console.error('Erro no gráfico de tendência:', e); }
+  try{ renderRecurringList(); }catch(e){ console.error('Erro nos recorrentes:', e); }
+  try{ renderForecast(key); }catch(e){ console.error('Erro na previsão:', e); }
+  try{ renderPrevistoRealizado(key); }catch(e){ console.error('Erro em previsto vs realizado:', e); }
 }
 
 function startEdit(id){
@@ -764,7 +753,7 @@ function renderRecurringList(){
   empty.style.display='none';
   list.innerHTML = recorrentes.map(r=>`
     <div class="rec-item">
-      <div class="info"><span class="d">${r.descricao}</span><span class="c">${r.categoria} · ${r.tipo==='receita'?'Receita':'Despesa'}</span></div>
+      <div class="info"><span class="d"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${catColor(r.categoria)};margin-right:6px;"></span>${r.descricao}</span><span class="c">${r.categoria} · ${r.tipo==='receita'?'Receita':'Despesa'}</span></div>
       <div style="display:flex;align-items:center;gap:14px;">
         <span class="num ${r.tipo==='receita'?'pos':'neg'}">${fmt(Number(r.valor))}/mês</span>
         <button class="del" data-id="${r.id}" title="Remover">×</button>
@@ -817,65 +806,19 @@ function renderPrevistoRealizado(key){
   `;
 }
 
-function renderBudgets(key){
-  const items = computeMonthTotals(key).items.filter(t=>t.tipo==='despesa');
-  const list = document.getElementById('budgetsList');
-  list.innerHTML = allCats().map(cat=>{
-    const gasto = items.filter(t=>t.categoria===cat).reduce((a,t)=>a+Number(t.valor),0);
-    const limite = orcamentos[cat] || 0;
-    let barHtml = '';
-    if(limite > 0){
-      const pct = Math.min(100, (gasto/limite)*100);
-      const color = pct>=100 ? 'var(--rust)' : (pct>=70 ? 'var(--gold)' : 'var(--olive)');
-      barHtml = `<div class="progress-bar-track"><div class="progress-bar-fill" style="width:${pct}%;background:${color};"></div></div>
-        <div class="nums">${fmt(gasto)} de ${fmt(limite)} (${pct.toFixed(0)}%)</div>`;
-    } else if(gasto > 0){
-      barHtml = `<div class="nums">Gasto no mês: ${fmt(gasto)} · sem limite definido</div>`;
-    }
-    return `<div class="budget-row">
-      <div class="info"><div class="name">${cat}</div>${barHtml}</div>
-      <input type="number" step="50" placeholder="Limite R$" data-cat="${cat}" class="budget-input" value="${limite||''}">
-    </div>`;
-  }).join('');
-  list.querySelectorAll('.budget-input').forEach(inp=>{
-    inp.addEventListener('change', async ()=>{
-      const v = parseFloat(inp.value);
-      if(v > 0) orcamentos[inp.dataset.cat] = v;
-      else delete orcamentos[inp.dataset.cat];
-      await persist();
-      showToast('Orçamento atualizado.');
-    });
-  });
-}
-
-function renderMeta(){
-  const accumulado = transactions.reduce((acc,t)=> acc + (t.tipo==='receita'?Number(t.valor):-Number(t.valor)), 0);
-  const fill = document.getElementById('metaFill');
-  const text = document.getElementById('metaText');
-  if(!metaReserva || metaReserva<=0){
-    fill.style.width='0%';
-    text.textContent = 'Defina uma meta acima para acompanhar o progresso.';
+function renderCatChart(despesaItems){
+  const empty = document.getElementById('catEmpty');
+  const canvas = document.getElementById('catChart');
+  if(typeof Chart === 'undefined'){
+    empty.style.display='block'; empty.textContent='Não foi possível carregar a biblioteca de gráficos (verifique sua conexão e recarregue a página).';
+    canvas.style.display='none';
     return;
   }
-  const pct = Math.max(0, Math.min(100, (accumulado/metaReserva)*100));
-  fill.style.width = pct + '%';
-  fill.style.background = pct>=100 ? 'var(--gold)' : 'var(--olive)';
-  text.textContent = fmt(Math.max(0,accumulado)) + ' de ' + fmt(metaReserva) + ' (' + pct.toFixed(1) + '%)';
-}
-document.getElementById('metaInput').addEventListener('change', async (e)=>{
-  metaReserva = parseFloat(e.target.value) || 0;
-  await persist();
-  renderMeta();
-});
-
-function renderCatChart(despesaItems){
   const byCat = {};
   despesaItems.forEach(t=>{ byCat[t.categoria] = (byCat[t.categoria]||0) + Number(t.valor); });
   const labels = Object.keys(byCat);
   const data = Object.values(byCat);
-  const empty = document.getElementById('catEmpty');
-  const canvas = document.getElementById('catChart');
-  if(labels.length===0){ empty.style.display='block'; canvas.style.display='none'; if(catChart) catChart.destroy(); return; }
+  if(labels.length===0){ empty.style.display='block'; empty.textContent='Nenhum lançamento de despesa neste mês ainda.'; canvas.style.display='none'; if(catChart) catChart.destroy(); return; }
   empty.style.display='none'; canvas.style.display='block';
   const colors = labels.map(catColor);
   if(catChart) catChart.destroy();
@@ -891,6 +834,7 @@ function renderCatChart(despesaItems){
 }
 
 function renderTrendChart(pastKeys, selectedKey){
+  if(typeof Chart === 'undefined'){ return; }
   const currentKey = new Date().toISOString().slice(0,7);
   const startFuture = selectedKey > currentKey ? selectedKey : currentKey;
   const futureKeys = [1,2,3].map(n=>addMonths(startFuture, n));
@@ -1152,7 +1096,7 @@ function renderTripDetail(){
     body.innerHTML = gastos.map(g=>`<tr>
       <td class="num">${g.data.split('-').reverse().join('/')}</td>
       <td>${g.descricao}</td>
-      <td><span class="tag">${g.categoria}</span></td>
+      <td><span class="tag" ${tagStyle(tripCatColor(g.categoria))}>${g.categoria}</span></td>
       <td class="right num neg">${fmt(Number(g.valor))}</td>
       <td><button class="del" data-id="${g.id}" title="Remover">×</button></td>
     </tr>`).join('');
