@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Livro-Caixa — Controle Financeiro</title>
+<title>Se Controla — Controle Financeiro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
@@ -179,7 +179,7 @@
 
 <div class="gate-overlay" id="gateOverlay">
   <div class="gate-box">
-    <h2>Livro-Caixa</h2>
+    <h2>Se Controla</h2>
     <p>Pra sincronizar seus dados entre computadores em tempo real, você precisa de uma chave de acesso privada — funciona como um link secreto, sem precisar de login.</p>
     <div class="gate-section">
       <label>Nova chave (gerada agora, use no primeiro acesso)</label>
@@ -202,7 +202,7 @@
 <div class="wrap">
   <div class="masthead">
     <div>
-      <h1>Livro-Caixa</h1>
+      <h1>Se Controla</h1>
       <div class="sub">Controle financeiro</div>
     </div>
     <div class="month-control">
@@ -222,16 +222,10 @@
   <!-- ==================== ABA MENSAL ==================== -->
   <div class="tab-panel active" id="panelMensal">
 
-    <div class="hero">
-      <div class="hero-balance">
-        <div class="label" id="heroLabel">Saldo do mês</div>
-        <div class="value num" id="heroValue">R$ 0,00</div>
-        <div class="accum">Saldo geral (inclui parcelas futuras já agendadas): <span class="num" id="accumValue">R$ 0,00</span></div>
-      </div>
-      <div class="tape">
-        <div class="label">Fita de saldos correntes</div>
-        <div id="tapeRows"></div>
-      </div>
+    <div class="hero-balance" style="margin-bottom:22px;">
+      <div class="label" id="heroLabel">Saldo do mês</div>
+      <div class="value num" id="heroValue">R$ 0,00</div>
+      <div class="accum">Saldo geral (inclui parcelas futuras já agendadas): <span class="num" id="accumValue">R$ 0,00</span></div>
     </div>
 
     <div class="cards">
@@ -267,9 +261,10 @@
         <input type="text" id="filterSearch" placeholder="Buscar por descrição...">
         <select id="filterCategoria"><option value="">Todas as categorias</option></select>
         <select id="filterNatureza">
-          <option value="">Pessoal e Profissional</option>
+          <option value="">Pessoal, Profissional e Viagem</option>
           <option value="pessoal">Só Pessoal</option>
           <option value="profissional">Só Profissional</option>
+          <option value="viagem">Só Viagens</option>
         </select>
       </div>
       <table>
@@ -298,7 +293,7 @@
           <div><label>Tipo</label><select id="fTipo"><option value="receita">Receita</option><option value="despesa">Despesa</option></select></div>
         </div>
         <div class="form-row">
-          <div><label>Natureza</label><select id="fNatureza"><option value="pessoal">Pessoal</option><option value="profissional">Profissional</option></select></div>
+          <div><label>Natureza</label><select id="fNatureza"><option value="pessoal">Pessoal</option><option value="profissional">Profissional</option><option value="viagem">Viagem</option></select></div>
           <div></div>
         </div>
         <div class="new-cat-row">
@@ -341,7 +336,7 @@
   <div class="tab-panel" id="panelViagens">
     <div class="section">
       <h3>Suas viagens</h3>
-      <div class="desc">Cada viagem tem orçamento e gastos próprios, separados do controle mensal.</div>
+      <div class="desc">Os gastos de cada viagem entram automaticamente no controle mensal geral, marcados como "Viagem".</div>
       <div class="trip-grid" id="tripGrid"></div>
       <div class="empty" id="tripEmpty" style="display:none;">Nenhuma viagem cadastrada ainda.</div>
       <div class="form-row" style="margin-top:10px;">
@@ -371,7 +366,7 @@
           <h3>Adicionar gasto</h3>
           <div class="form-row">
             <div><label>Data</label><input type="date" id="tripGastoData"></div>
-            <div><label>Valor (R$)</label><input type="number" id="tripGastoValor" step="0.01" placeholder="0,00"></div>
+            <div><label>Valor por parcela (R$)</label><input type="number" id="tripGastoValor" step="0.01" placeholder="0,00"></div>
           </div>
           <div class="form-row full"><div><label>Descrição</label><input type="text" id="tripGastoDesc" placeholder="Ex: Hotel, passeio, jantar..."></div></div>
           <div class="form-row full">
@@ -380,6 +375,13 @@
                 <option>Passagens</option><option>Hospedagem</option><option>Alimentação</option>
                 <option>Passeios</option><option>Transporte local</option><option>Outros</option>
               </select>
+            </div>
+          </div>
+          <label class="checkline" id="tripParceladoCheckline"><input type="checkbox" id="tripGastoParcelado"> É parcelado?</label>
+          <div class="sub-field" id="tripParceladoField">
+            <div class="form-row">
+              <div><label>Número de parcelas</label><input type="number" id="tripGastoParcelas" min="2" step="1" placeholder="Ex: 10"></div>
+              <div><label>Esta é a parcela nº</label><input type="number" id="tripGastoParcelaAtual" min="1" step="1" value="1"></div>
             </div>
           </div>
           <div class="form-actions"><button class="btn btn-gold" id="addTripGastoBtn">Adicionar gasto</button></div>
@@ -392,9 +394,24 @@
       </table>
       <div class="empty" id="tripGastosEmpty" style="display:none;">Nenhum gasto lançado ainda.</div>
 
-      <div class="form-actions" style="margin-top:14px;"><button class="btn" id="deleteTripBtn">Excluir esta viagem</button></div>
+      <div class="section" style="margin-top:20px;background:var(--surface-2);">
+        <h3>Roteiro da viagem</h3>
+        <div class="desc">Planeje o dia a dia — isso é só organizacional, não afeta valores.</div>
+        <div class="form-row">
+          <div><label>Data</label><input type="date" id="roteiroData"></div>
+          <div><label>Horário (opcional)</label><input type="time" id="roteiroHorario"></div>
+        </div>
+        <div class="form-row full"><div><label>Título</label><input type="text" id="roteiroTitulo" placeholder="Ex: Check-in hotel, Torre Eiffel, Jantar..."></div></div>
+        <div class="form-row full"><div><label>Nota (opcional)</label><input type="text" id="roteiroNota" placeholder="Endereço, link, observação..."></div></div>
+        <div class="form-actions"><button class="btn btn-gold" id="addRoteiroBtn">Adicionar ao roteiro</button></div>
+        <div class="recurring-list" id="roteiroList" style="margin-top:14px;"></div>
+        <div class="empty" id="roteiroEmpty" style="display:none;">Nenhum item no roteiro ainda.</div>
+      </div>
+
+      <div class="form-actions" style="margin-top:14px;"><button class="btn" id="deleteTripBtn">Excluir esta viagem (e seus gastos do controle geral)</button></div>
     </div>
   </div>
+
 
 </div>
 <div class="toast" id="toast"></div>
@@ -494,10 +511,12 @@ function subscribeData(){
     orcamentos = data.orcamentos || {};
     metaReserva = data.metaReserva || 0;
     viagens = data.viagens || [];
+    const migrou = migrateOldTripGastos();
     renderCategorySelects();
     populateMonthSelect();
     render();
     renderViagens();
+    if(migrou){ persist(); }
   }, err=>{
     console.error(err);
     showToast('Erro de sincronização — confira a configuração do Firebase.');
@@ -546,7 +565,7 @@ document.getElementById('addCatBtn').addEventListener('click', async ()=>{
 });
 
 // ---------- Parcelamento ----------
-function gerarParcelas({data, descricao, categoria, tipo, valor, natureza, parcelas, parcelaAtual}){
+function gerarParcelas({data, descricao, categoria, tipo, valor, natureza, parcelas, parcelaAtual, viagemRef}){
   const grupo = genId();
   const out = [];
   const restantes = parcelas - parcelaAtual + 1;
@@ -557,7 +576,8 @@ function gerarParcelas({data, descricao, categoria, tipo, valor, natureza, parce
       descricao: descricao + ' (parcela ' + (parcelaAtual+i) + '/' + parcelas + ')',
       categoria, tipo, natureza: natureza || 'pessoal',
       valor: Math.abs(Number(valor)),
-      parcela: {grupo, atual: parcelaAtual+i, total: parcelas}
+      parcela: {grupo, atual: parcelaAtual+i, total: parcelas},
+      ...(viagemRef ? {viagemRef} : {})
     });
   }
   return out;
@@ -642,11 +662,6 @@ function render(){
   if(!allKeys.includes(key)) allKeys.push(key);
   allKeys.sort();
   const last6 = allKeys.slice(-6);
-  const tapeHtml = last6.slice().reverse().map(k=>{
-    const cum = computeCumulativeReal(k);
-    return `<div class="tape-row"><span class="m">${monthLabel(k)}</span><span class="v num ${cum>=0?'pos':'neg'}">${fmt(cum)}</span></div>`;
-  }).join('');
-  document.getElementById('tapeRows').innerHTML = tapeHtml || '<div class="tape-row"><span class="m">Sem histórico ainda</span></div>';
 
   // ledger com filtros
   const filtered = getFilteredItems(key);
@@ -663,11 +678,14 @@ function render(){
     ledgerBody.innerHTML = filtered.map(t=>{
       const parcelaTag = t.parcela ? `<span class="tag mini">${t.parcela.atual}/${t.parcela.total}</span>` : '';
       const recTag = t.recorrenteRef ? `<span class="tag mini">recorrente</span>` : '';
+      const viagemNome = t.viagemRef ? (viagens.find(v=>v.id===t.viagemRef)||{}).nome : null;
+      const viagemTag = viagemNome ? `<span class="tag mini">✈ ${viagemNome}</span>` : '';
+      const naturezaLabel = t.natureza==='profissional' ? 'Profissional' : (t.natureza==='viagem' ? 'Viagem' : 'Pessoal');
       return `<tr>
         <td class="num">${t.data.split('-').reverse().join('/')}</td>
-        <td>${t.descricao}${parcelaTag}${recTag}</td>
+        <td>${t.descricao}${parcelaTag}${recTag}${viagemTag}</td>
         <td><span class="tag" ${tagStyle(catColor(t.categoria))}>${t.categoria}</span></td>
-        <td><span class="tag">${t.natureza==='profissional'?'Profissional':'Pessoal'}</span></td>
+        <td><span class="tag">${naturezaLabel}</span></td>
         <td class="${t.tipo==='receita'?'pos':'neg'}">${t.tipo==='receita'?'Receita':'Despesa'}</td>
         <td class="right num ${t.tipo==='receita'?'pos':'neg'}">${t.tipo==='receita'?'+':'-'} ${fmt(Number(t.valor))}</td>
         <td class="right num">${fmt(runningMap[t.id])}</td>
@@ -994,7 +1012,7 @@ document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
   const esc = (s)=> '"' + String(s).replace(/"/g,'""') + '"';
   const rows = [['Data','Descrição','Categoria','Natureza','Tipo','Valor'].map(esc).join(';')];
   transactions.slice().sort((a,b)=>a.data.localeCompare(b.data)).forEach(t=>{
-    rows.push([t.data.split('-').reverse().join('/'), t.descricao, t.categoria, t.natureza==='profissional'?'Profissional':'Pessoal', t.tipo==='receita'?'Receita':'Despesa', Number(t.valor).toFixed(2).replace('.',',')].map(esc).join(';'));
+    rows.push([t.data.split('-').reverse().join('/'), t.descricao, t.categoria, t.natureza==='profissional'?'Profissional':(t.natureza==='viagem'?'Viagem':'Pessoal'), t.tipo==='receita'?'Receita':'Despesa', Number(t.valor).toFixed(2).replace('.',',')].map(esc).join(';'));
   });
   const blob = new Blob(['\uFEFF' + rows.join('\r\n')], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
@@ -1047,7 +1065,27 @@ document.getElementById('tabViagensBtn').addEventListener('click', ()=>{
 });
 
 // ---------- Viagens ----------
-function tripSpent(trip){ return (trip.gastos||[]).reduce((a,g)=>a+Number(g.valor),0); }
+function tripExpenses(tripId){ return transactions.filter(t=>t.viagemRef===tripId && t.tipo==='despesa'); }
+function tripSpent(trip){ return tripExpenses(trip.id).reduce((a,t)=>a+Number(t.valor),0); }
+
+// migração: versões antigas guardavam gastos dentro da própria viagem (trip.gastos).
+// isso converte esses gastos em lançamentos reais do controle geral, uma única vez.
+function migrateOldTripGastos(){
+  let changed = false;
+  viagens.forEach(v=>{
+    if(v.gastos && v.gastos.length){
+      v.gastos.forEach(g=>{
+        transactions.push({
+          id: g.id || genId(), data: g.data, descricao: g.descricao, categoria: g.categoria,
+          tipo: 'despesa', natureza: 'viagem', valor: Math.abs(Number(g.valor)), viagemRef: v.id
+        });
+      });
+      delete v.gastos;
+      changed = true;
+    }
+  });
+  return changed;
+}
 
 function renderViagens(){
   const grid = document.getElementById('tripGrid');
@@ -1085,26 +1123,29 @@ function renderTripDetail(){
   document.getElementById('tripFill').style.background = pct>=100 ? 'var(--rust)' : 'var(--olive)';
   document.getElementById('tripBudgetText').textContent = trip.orcamento>0
     ? fmt(spent) + ' gastos de ' + fmt(trip.orcamento) + ' orçados (' + pct.toFixed(0) + '%)'
-    : fmt(spent) + ' gastos (sem orçamento definido)';
+    : fmt(spent) + ' gastos (sem orçamento definido) · esses valores já entram no seu controle mensal';
 
-  const gastos = (trip.gastos||[]).slice().sort((a,b)=>a.data.localeCompare(b.data));
+  const gastos = tripExpenses(trip.id).slice().sort((a,b)=>a.data.localeCompare(b.data));
   const body = document.getElementById('tripGastosBody');
   const gEmpty = document.getElementById('tripGastosEmpty');
   if(gastos.length===0){ body.innerHTML=''; gEmpty.style.display='block'; }
   else{
     gEmpty.style.display='none';
-    body.innerHTML = gastos.map(g=>`<tr>
+    body.innerHTML = gastos.map(g=>{
+      const parcelaTag = g.parcela ? `<span class="tag mini">${g.parcela.atual}/${g.parcela.total}</span>` : '';
+      return `<tr>
       <td class="num">${g.data.split('-').reverse().join('/')}</td>
-      <td>${g.descricao}</td>
+      <td>${g.descricao}${parcelaTag}</td>
       <td><span class="tag" ${tagStyle(tripCatColor(g.categoria))}>${g.categoria}</span></td>
       <td class="right num neg">${fmt(Number(g.valor))}</td>
       <td><button class="del" data-id="${g.id}" title="Remover">×</button></td>
-    </tr>`).join('');
+    </tr>`;
+    }).join('');
     body.querySelectorAll('.del').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        trip.gastos = trip.gastos.filter(g=>g.id!==btn.dataset.id);
+        transactions = transactions.filter(t=>t.id!==btn.dataset.id);
         await persist();
-        showToast('Gasto removido.');
+        showToast('Gasto removido do controle geral também.');
       });
     });
   }
@@ -1115,10 +1156,11 @@ function renderTripDetail(){
   const data = Object.values(byCat);
   const canvas = document.getElementById('tripCatChart');
   const catEmpty = document.getElementById('tripCatEmpty');
-  if(labels.length===0){ catEmpty.style.display='block'; canvas.style.display='none'; if(tripCatChart) tripCatChart.destroy(); }
+  if(typeof Chart === 'undefined'){ catEmpty.style.display='block'; catEmpty.textContent='Não foi possível carregar a biblioteca de gráficos.'; canvas.style.display='none'; }
+  else if(labels.length===0){ catEmpty.style.display='block'; catEmpty.textContent='Sem gastos ainda.'; canvas.style.display='none'; if(tripCatChart) tripCatChart.destroy(); }
   else{
     catEmpty.style.display='none'; canvas.style.display='block';
-    const colors = labels.map(l=> TRIP_COLORS[TRIP_CATS.indexOf(l)>=0?TRIP_CATS.indexOf(l):0]);
+    const colors = labels.map(tripCatColor);
     if(tripCatChart) tripCatChart.destroy();
     tripCatChart = new Chart(canvas.getContext('2d'), {
       type:'bar',
@@ -1130,7 +1172,38 @@ function renderTripDetail(){
         }}
     });
   }
+
+  renderRoteiro(trip);
 }
+
+function renderRoteiro(trip){
+  const list = document.getElementById('roteiroList');
+  const empty = document.getElementById('roteiroEmpty');
+  const itens = (trip.roteiro||[]).slice().sort((a,b)=> (a.data+((a.horario)||'')).localeCompare(b.data+((b.horario)||'')));
+  if(itens.length===0){ list.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  list.innerHTML = itens.map(it=>{
+    const dataFmt = it.data ? it.data.split('-').reverse().join('/') : '';
+    const horarioFmt = it.horario ? ' · ' + it.horario : '';
+    const notaFmt = it.nota ? ' · ' + it.nota : '';
+    return `<div class="rec-item">
+      <div class="info"><span class="d">${it.titulo}</span><span class="c">${dataFmt}${horarioFmt}${notaFmt}</span></div>
+      <button class="del" data-id="${it.id}" title="Remover">×</button>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.del').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      trip.roteiro = (trip.roteiro||[]).filter(it=>it.id!==btn.dataset.id);
+      await persist();
+      renderRoteiro(trip);
+      showToast('Item do roteiro removido.');
+    });
+  });
+}
+
+document.getElementById('tripGastoParcelado').addEventListener('change', (e)=>{
+  document.getElementById('tripParceladoField').classList.toggle('show', e.target.checked);
+});
 
 document.getElementById('addTripBtn').addEventListener('click', async ()=>{
   const nome = document.getElementById('tripNome').value.trim();
@@ -1138,7 +1211,7 @@ document.getElementById('addTripBtn').addEventListener('click', async ()=>{
   const dataInicio = document.getElementById('tripInicio').value;
   const dataFim = document.getElementById('tripFim').value;
   if(!nome){ showToast('Dê um nome pra viagem.'); return; }
-  const trip = {id:genId(), nome, orcamento, dataInicio, dataFim, gastos:[]};
+  const trip = {id:genId(), nome, orcamento, dataInicio, dataFim, roteiro:[]};
   viagens.push(trip);
   selectedTripId = trip.id;
   await persist();
@@ -1155,29 +1228,58 @@ document.getElementById('addTripGastoBtn').addEventListener('click', async ()=>{
   const valor = parseFloat(document.getElementById('tripGastoValor').value);
   const descricao = document.getElementById('tripGastoDesc').value.trim();
   const categoria = document.getElementById('tripGastoCategoria').value;
+  const parcelado = document.getElementById('tripGastoParcelado').checked;
   if(!data || !valor || !descricao){ showToast('Preencha data, descrição e valor.'); return; }
-  trip.gastos = trip.gastos || [];
-  trip.gastos.push({id:genId(), data, descricao, categoria, valor:Math.abs(valor)});
+
+  if(parcelado){
+    const parcelas = parseInt(document.getElementById('tripGastoParcelas').value, 10);
+    const parcelaAtual = parseInt(document.getElementById('tripGastoParcelaAtual').value, 10) || 1;
+    if(!parcelas || parcelas < 2 || parcelaAtual > parcelas){ showToast('Confira o número de parcelas.'); return; }
+    const novas = gerarParcelas({data, descricao, categoria, tipo:'despesa', valor, natureza:'viagem', parcelas, parcelaAtual, viagemRef:trip.id});
+    transactions.push(...novas);
+  } else {
+    transactions.push({id:genId(), data, descricao, categoria, tipo:'despesa', natureza:'viagem', valor:Math.abs(valor), viagemRef:trip.id});
+  }
   await persist();
   document.getElementById('tripGastoValor').value=''; document.getElementById('tripGastoDesc').value='';
+  document.getElementById('tripGastoParcelado').checked=false;
+  document.getElementById('tripParceladoField').classList.remove('show');
   renderViagens();
-  showToast('Gasto adicionado.');
+  showToast('Gasto adicionado — já entra no seu controle mensal também.');
+});
+
+document.getElementById('addRoteiroBtn').addEventListener('click', async ()=>{
+  const trip = viagens.find(v=>v.id===selectedTripId);
+  if(!trip) return;
+  const data = document.getElementById('roteiroData').value;
+  const horario = document.getElementById('roteiroHorario').value;
+  const titulo = document.getElementById('roteiroTitulo').value.trim();
+  const nota = document.getElementById('roteiroNota').value.trim();
+  if(!data || !titulo){ showToast('Preencha ao menos data e título.'); return; }
+  trip.roteiro = trip.roteiro || [];
+  trip.roteiro.push({id:genId(), data, horario, titulo, nota});
+  await persist();
+  document.getElementById('roteiroTitulo').value=''; document.getElementById('roteiroNota').value=''; document.getElementById('roteiroHorario').value='';
+  renderRoteiro(trip);
+  showToast('Item adicionado ao roteiro.');
 });
 
 document.getElementById('deleteTripBtn').addEventListener('click', async ()=>{
   const trip = viagens.find(v=>v.id===selectedTripId);
   if(!trip) return;
-  const ok = confirm('Excluir a viagem "' + trip.nome + '" e todos os seus gastos?');
+  const ok = confirm('Excluir a viagem "' + trip.nome + '"? Os gastos dela também serão removidos do seu controle mensal.');
   if(!ok) return;
+  transactions = transactions.filter(t=>t.viagemRef!==selectedTripId);
   viagens = viagens.filter(v=>v.id!==selectedTripId);
   selectedTripId = null;
   await persist();
   renderViagens();
-  showToast('Viagem excluída.');
+  showToast('Viagem e seus gastos excluídos.');
 });
 
 (function init(){
   document.getElementById('newKeyDisplay').value = randomKey();
+  document.getElementById('roteiroData').valueAsDate = new Date();
   renderCategorySelects();
   const existing = localStorage.getItem('lc_workspace_key');
   if(existing){ startApp(existing); }
