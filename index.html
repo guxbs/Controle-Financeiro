@@ -98,7 +98,6 @@
     cursor:pointer; color:var(--ink-dim); padding:0; transition:border-color .15s, color .15s;
   }
   .eye-toggle:hover{ border-color:var(--gold); color:var(--gold); }
-  .blurred{ filter: blur(7px); user-select:none; }
 
   .tape{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 22px;display:flex;flex-direction:column;justify-content:center;gap:6px;}
   .tape .label{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-dim);margin-bottom:6px;}
@@ -549,7 +548,9 @@ function showToast(msg){
 function genId(){ return 't_' + Date.now() + '_' + Math.random().toString(36).slice(2,8); }
 function applyVisibilityToggle(){
   ['heroValue','cardReceitas','cardDespesas','cardSaldo'].forEach(id=>{
-    document.getElementById(id).classList.toggle('blurred', valoresOcultos);
+    const el = document.getElementById(id);
+    if(!el.dataset.real) return;
+    el.textContent = valoresOcultos ? 'R$ ********' : el.dataset.real;
   });
   document.getElementById('eyeIconOpen').style.display = valoresOcultos ? 'none' : 'block';
   document.getElementById('eyeIconClosed').style.display = valoresOcultos ? 'block' : 'none';
@@ -717,10 +718,14 @@ function render(){
   const cumulativo = computeCumulativeReal(key);
   document.getElementById('heroLabel').textContent = 'Saldo corrente até ' + monthLabel(key);
   document.getElementById('heroValue').textContent = fmt(cumulativo);
+  document.getElementById('heroValue').dataset.real = fmt(cumulativo);
   document.getElementById('heroValue').className = 'value num ' + (cumulativo>=0?'pos':'neg');
   document.getElementById('cardReceitas').textContent = fmt(receitas);
+  document.getElementById('cardReceitas').dataset.real = fmt(receitas);
   document.getElementById('cardDespesas').textContent = fmt(despesas);
+  document.getElementById('cardDespesas').dataset.real = fmt(despesas);
   document.getElementById('cardSaldo').textContent = fmt(saldo);
+  document.getElementById('cardSaldo').dataset.real = fmt(saldo);
   document.getElementById('cardSaldo').className = 'value num ' + (saldo>=0?'pos':'neg');
   applyVisibilityToggle();
 
