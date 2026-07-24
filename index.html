@@ -701,7 +701,8 @@ function render(){
   const allKeys = Array.from(new Set(transactions.map(t=>monthKey(t.data)))).sort();
   if(!allKeys.includes(key)) allKeys.push(key);
   allKeys.sort();
-  const last6 = allKeys.slice(-6);
+  // apenas meses até o selecionado (exclui parcelas/recorrentes já pré-lançadas no futuro distante)
+  const last6 = allKeys.filter(k=>k<=key).slice(-6);
 
   // ledger com filtros
   const filtered = getFilteredItems(key);
