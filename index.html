@@ -227,6 +227,25 @@
     .form-row{grid-template-columns:1fr;}
     .forecast-row{grid-template-columns:1fr;}
   }
+  @media (max-width:680px){
+    table.responsive-table thead{ display:none; }
+    table.responsive-table, table.responsive-table tbody, table.responsive-table tr, table.responsive-table td{
+      display:block; width:100%;
+    }
+    table.responsive-table tr{
+      border:1px solid var(--line); border-radius:12px; margin-bottom:12px; padding:6px 14px;
+      background:var(--surface-2);
+    }
+    table.responsive-table td{
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      padding:9px 0; border-bottom:1px dashed var(--line); text-align:right;
+    }
+    table.responsive-table tr td:last-child{ border-bottom:none; }
+    table.responsive-table td::before{
+      content: attr(data-label); font-size:11px; color:var(--ink-faint); text-transform:uppercase;
+      letter-spacing:0.4px; text-align:left; margin-right:auto; flex-shrink:0;
+    }
+  }
 </style>
 </head>
 <body>
@@ -329,7 +348,7 @@
           <option value="viagem">Só Viagens</option>
         </select>
       </div>
-      <table>
+      <table class="responsive-table">
         <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Natureza</th><th>Tipo</th><th class="right">Valor</th><th class="right">Saldo</th><th></th></tr></thead>
         <tbody id="ledgerBody"></tbody>
       </table>
@@ -450,7 +469,7 @@
         </div>
       </div>
 
-      <table style="margin-top:16px;">
+      <table class="responsive-table" style="margin-top:16px;">
         <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th class="right">Valor</th><th></th></tr></thead>
         <tbody id="tripGastosBody"></tbody>
       </table>
@@ -762,13 +781,13 @@ function render(){
       const viagemTag = viagemNome ? `<span class="tag mini">✈ ${viagemNome}</span>` : '';
       const naturezaLabel = t.natureza==='profissional' ? 'Profissional' : (t.natureza==='viagem' ? 'Viagem' : 'Pessoal');
       return `<tr>
-        <td class="num">${t.data.split('-').reverse().join('/')}</td>
-        <td>${t.descricao}${parcelaTag}${recTag}${viagemTag}</td>
-        <td><span class="tag" ${tagStyle(catColor(t.categoria))}>${t.categoria}</span></td>
-        <td><span class="tag">${naturezaLabel}</span></td>
-        <td class="${t.tipo==='receita'?'pos':'neg'}">${t.tipo==='receita'?'Receita':'Despesa'}</td>
-        <td class="right num ${t.tipo==='receita'?'pos':'neg'}">${t.tipo==='receita'?'+':'-'} ${fmt(Number(t.valor))}</td>
-        <td class="right num">${fmt(runningMap[t.id])}</td>
+        <td class="num" data-label="Data">${t.data.split('-').reverse().join('/')}</td>
+        <td data-label="Descrição">${t.descricao}${parcelaTag}${recTag}${viagemTag}</td>
+        <td data-label="Categoria"><span class="tag" ${tagStyle(catColor(t.categoria))}>${t.categoria}</span></td>
+        <td data-label="Natureza"><span class="tag">${naturezaLabel}</span></td>
+        <td data-label="Tipo" class="${t.tipo==='receita'?'pos':'neg'}">${t.tipo==='receita'?'Receita':'Despesa'}</td>
+        <td data-label="Valor" class="right num ${t.tipo==='receita'?'pos':'neg'}">${t.tipo==='receita'?'+':'-'} ${fmt(Number(t.valor))}</td>
+        <td data-label="Saldo" class="right num">${fmt(runningMap[t.id])}</td>
         <td><button class="edit-btn" data-id="${t.id}" title="Editar">✎</button><button class="del" data-id="${t.id}" title="Remover">×</button></td>
       </tr>`;
     }).join('');
@@ -1214,10 +1233,10 @@ function renderTripDetail(){
     body.innerHTML = gastos.map(g=>{
       const parcelaTag = g.parcela ? `<span class="tag mini">${g.parcela.atual}/${g.parcela.total}</span>` : '';
       return `<tr>
-      <td class="num">${g.data.split('-').reverse().join('/')}</td>
-      <td>${g.descricao}${parcelaTag}</td>
-      <td><span class="tag" ${tagStyle(tripCatColor(g.categoria))}>${g.categoria}</span></td>
-      <td class="right num neg">${fmt(Number(g.valor))}</td>
+      <td class="num" data-label="Data">${g.data.split('-').reverse().join('/')}</td>
+      <td data-label="Descrição">${g.descricao}${parcelaTag}</td>
+      <td data-label="Categoria"><span class="tag" ${tagStyle(tripCatColor(g.categoria))}>${g.categoria}</span></td>
+      <td data-label="Valor" class="right num neg">${fmt(Number(g.valor))}</td>
       <td><button class="del" data-id="${g.id}" title="Remover">×</button></td>
     </tr>`;
     }).join('');
