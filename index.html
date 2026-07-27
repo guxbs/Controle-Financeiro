@@ -47,8 +47,14 @@
   body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
   .wrap{max-width:1180px;margin:0 auto;padding:40px 28px 80px;}
   .masthead{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--line-strong);padding-bottom:20px;margin-bottom:22px;flex-wrap:wrap;gap:16px;}
+  .masthead-brand{display:flex;align-items:center;gap:12px;}
+  .masthead-logo{height:52px;width:auto;display:block;}
   .masthead h1{font-family:'Spectral',serif;font-weight:500;font-size:28px;margin:0 0 4px;letter-spacing:0.2px;}
   .masthead .sub{color:var(--ink-dim);font-size:13px;letter-spacing:0.4px;text-transform:uppercase;}
+  @media (max-width:480px){
+    .masthead-logo{height:40px;}
+    .masthead h1{font-size:24px;}
+  }
   .month-control{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   select, .btn, input, textarea{font-family:'Inter',sans-serif;background:var(--surface);border:1px solid var(--line-strong);color:var(--ink);border-radius:var(--radius);padding:9px 13px;font-size:14px;}
   select{cursor:pointer;}
@@ -274,9 +280,12 @@
 
 <div class="wrap">
   <div class="masthead">
-    <div>
-      <h1>Se Controla</h1>
-      <div class="sub">Controle financeiro</div>
+    <div class="masthead-brand">
+      <img src="./logo-header.png" alt="Se Controla" class="masthead-logo">
+      <div>
+        <h1>Se Controla</h1>
+        <div class="sub">Controle financeiro</div>
+      </div>
     </div>
     <div class="month-control">
       <select id="monthSelect"></select>
