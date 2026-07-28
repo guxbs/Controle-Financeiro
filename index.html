@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
   // plano B: se o CDN principal falhar, tenta um CDN alternativo
@@ -30,17 +30,18 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
   :root{
-    --ink:#1A2430;
-    --paper:#EFEBE1;
-    --surface:#FBF9F3;
-    --surface-2:#F2EDE1;
-    --line: rgba(26,36,48,0.12);
-    --line-strong: rgba(26,36,48,0.24);
-    --ink-dim: rgba(26,36,48,0.64);
-    --ink-faint: rgba(26,36,48,0.42);
-    --gold:#AD8626;
-    --olive:#4F7A62;
-    --rust:#A34A2E;
+    --ink:#121212;
+    --paper:#F2F2F7;
+    --surface:#FFFFFF;
+    --surface-2:#F2F2F7;
+    --line: rgba(18,18,18,0.10);
+    --line-strong: rgba(18,18,18,0.20);
+    --ink-dim: rgba(18,18,18,0.62);
+    --ink-faint: rgba(18,18,18,0.40);
+    --gold:#7B3FF2;
+    --olive:#2ECC71;
+    --rust:#E4577E;
+    --pink:#FF8DB8;
     --radius:10px;
   }
   *{box-sizing:border-box;}
@@ -49,7 +50,7 @@
   .masthead{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--line-strong);padding-bottom:20px;margin-bottom:22px;flex-wrap:wrap;gap:16px;}
   .masthead-brand{display:flex;align-items:center;gap:12px;}
   .masthead-logo{height:52px;width:auto;display:block;}
-  .masthead h1{font-family:'Spectral',serif;font-weight:500;font-size:28px;margin:0 0 4px;letter-spacing:0.2px;}
+  .masthead h1{font-family:'Poppins',sans-serif;font-weight:600;font-size:28px;margin:0 0 4px;letter-spacing:0.2px;}
   .masthead .sub{color:var(--ink-dim);font-size:13px;letter-spacing:0.4px;text-transform:uppercase;}
   @media (max-width:480px){
     .masthead-logo{height:40px;}
@@ -76,7 +77,7 @@
     background: linear-gradient(155deg, var(--surface) 0%, var(--surface) 70%, var(--surface-2) 100%);
     border:1px solid var(--line); border-radius:18px; padding:32px 34px;
     position:relative; overflow:hidden;
-    box-shadow: 0 1px 0 rgba(26,36,48,0.03);
+    box-shadow: 0 1px 0 rgba(18,18,18,0.03);
   }
   .hero-balance::before{
     content:''; position:absolute; top:0; left:0; right:0; height:4px;
@@ -91,19 +92,19 @@
     color:var(--ink-dim); margin-bottom:14px; font-weight:600;
   }
   .hero-balance .eyebrow svg{flex-shrink:0;}
-  .hero-balance .value{font-family:'IBM Plex Mono',monospace;font-size:48px;font-weight:500;letter-spacing:-0.5px; position:relative; z-index:1;}
+  .hero-balance .value{font-family:'Poppins',sans-serif;font-size:44px;font-weight:700;letter-spacing:-0.5px; position:relative; z-index:1;}
   .hero-balance .rule{width:46px;height:3px;border-radius:2px;background:linear-gradient(90deg, var(--gold), var(--olive)); margin:16px 0 12px;}
   .hero-balance .live{
     display:flex; align-items:center; gap:7px; font-size:12px; color:var(--ink-faint);
   }
   .hero-balance .live .dot{
     width:7px;height:7px;border-radius:50%;background:var(--olive);
-    box-shadow:0 0 0 0 rgba(79,122,98,0.5); animation:pulse 2s infinite;
+    box-shadow:0 0 0 0 rgba(46,204,113,0.5); animation:pulse 2s infinite;
   }
   @keyframes pulse{
-    0%{box-shadow:0 0 0 0 rgba(79,122,98,0.45);}
-    70%{box-shadow:0 0 0 7px rgba(79,122,98,0);}
-    100%{box-shadow:0 0 0 0 rgba(79,122,98,0);}
+    0%{box-shadow:0 0 0 0 rgba(46,204,113,0.45);}
+    70%{box-shadow:0 0 0 7px rgba(46,204,113,0);}
+    100%{box-shadow:0 0 0 0 rgba(46,204,113,0);}
   }
   .eye-toggle{
     position:absolute; top:20px; right:22px; z-index:2;
@@ -125,15 +126,15 @@
   .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px;}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;}
   .card .label{font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:var(--ink-dim);margin-bottom:8px;}
-  .card .value{font-size:24px;font-weight:500;}
+  .card .value{font-family:'Poppins',sans-serif;font-size:23px;font-weight:700;}
 
   .panels{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px;}
   .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;}
-  .panel h3{font-family:'Spectral',serif;font-weight:500;font-size:16px;margin:0 0 14px;color:var(--ink);}
+  .panel h3{font-family:'Poppins',sans-serif;font-weight:600;font-size:16px;margin:0 0 14px;color:var(--ink);}
   .empty{color:var(--ink-faint);font-size:13px;padding:24px 0;text-align:center;}
 
   .section{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;}
-  .section h3{font-family:'Spectral',serif;font-weight:500;font-size:16px;margin:0 0 6px;}
+  .section h3{font-family:'Poppins',sans-serif;font-weight:600;font-size:16px;margin:0 0 6px;}
   .section .desc{font-size:12px;color:var(--ink-faint);margin-bottom:14px;}
   table{width:100%;border-collapse:collapse;font-size:13px;}
   th{text-align:left;color:var(--ink-dim);font-weight:500;font-size:11px;letter-spacing:0.5px;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--line-strong);}
@@ -168,7 +169,7 @@
   .forecast-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px;}
   .forecast-card{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;}
   .forecast-card .m{font-size:12px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
-  .forecast-card .s{font-size:19px;font-weight:500;}
+  .forecast-card .s{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;}
   .forecast-card .breakdown{font-size:11px;color:var(--ink-faint);margin-top:6px;line-height:1.6;}
 
   .recurring-list{margin-top:14px;}
@@ -178,9 +179,9 @@
   .rec-item .info .d{font-weight:500;}
   .rec-item .info .c{font-size:11px;color:var(--ink-faint);}
 
-  .gate-overlay{position:fixed;inset:0;background:rgba(26,36,48,0.55);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .gate-overlay{position:fixed;inset:0;background:rgba(18,18,18,0.55);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
   .gate-box{background:var(--surface);border-radius:16px;padding:32px;max-width:440px;width:100%;border:1px solid var(--line-strong);}
-  .gate-box h2{font-family:'Spectral',serif;font-weight:500;margin:0 0 8px;}
+  .gate-box h2{font-family:'Poppins',sans-serif;font-weight:600;margin:0 0 8px;}
   .gate-box p{font-size:13px;color:var(--ink-dim);line-height:1.6;margin:0 0 16px;}
   .gate-section{margin-bottom:14px;}
   .gate-section label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.4px;color:var(--ink-dim);margin-bottom:6px;}
@@ -213,7 +214,7 @@
   .pv-row{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap;}
   .pv-col{flex:1;min-width:130px;font-size:12px;background:var(--surface-2);border-radius:8px;padding:10px 12px;}
   .pv-col .l{color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.4px;font-size:10px;}
-  .pv-col .v{font-size:15px;font-weight:500;margin-top:3px;}
+  .pv-col .v{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;margin-top:3px;}
 
   .goal-row{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
   .goal-row input{width:160px;}
@@ -222,7 +223,7 @@
   .trip-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;cursor:pointer;transition:border-color .15s;}
   .trip-card:hover{border-color:var(--gold);}
   .trip-card.active{border-color:var(--gold);border-width:2px;}
-  .trip-card h4{font-family:'Spectral',serif;margin:0 0 6px;font-size:16px;}
+  .trip-card h4{font-family:'Poppins',sans-serif;font-weight:600;margin:0 0 6px;font-size:16px;}
   .trip-card .period{font-size:11px;color:var(--ink-faint);margin-bottom:10px;}
   .trip-card .spent{font-size:13px;}
 
@@ -284,7 +285,7 @@
       <img src="./logo-header.png" alt="Se Controla" class="masthead-logo">
       <div>
         <h1>Se Controla</h1>
-        <div class="sub">Controle financeiro</div>
+        <div class="sub">Seu dinheiro. Seus planos. Seu futuro.</div>
       </div>
     </div>
     <div class="month-control">
@@ -534,10 +535,10 @@ let valoresOcultos = localStorage.getItem('lc_hide_values') === '1';
 let catChart, trendChart, tripCatChart;
 
 const CATS = ['Salário / Honorários','Investimentos','Moradia','Alimentação','Transporte','Saúde','Educação','Lazer','Assinaturas','Outros'];
-const CAT_COLORS = ['#AD8626','#4F7A62','#5C7A9E','#A34A2E','#8C6E9E','#B98A3D','#5E9488','#9C6E80','#7C8798','#6C7686'];
+const CAT_COLORS = ['#7B3FF2','#2ECC71','#FF8DB8','#5B2BC7','#1F9D58','#E4577E','#4C5FD5','#2FB8A6','#8A8A93','#B37FF0'];
 const TRIP_CATS = ['Passagens','Hospedagem','Alimentação','Passeios','Transporte local','Outros'];
-const TRIP_COLORS = ['#AD8626','#4F7A62','#5C7A9E','#A34A2E','#8C6E9E','#B98A3D'];
-const INK_TEXT = '#1A2430';
+const TRIP_COLORS = ['#FF8DB8','#7B3FF2','#2ECC71','#5B2BC7','#E4577E','#8A8A93'];
+const INK_TEXT = '#121212';
 
 function allCats(){ return CATS.concat(categoriasCustom); }
 function catColor(name){
@@ -953,7 +954,7 @@ function renderCatChart(despesaItems){
     data:{labels, datasets:[{data, backgroundColor:colors, borderRadius:4, barThickness:16}]},
     options:{ indexAxis:'y', plugins:{legend:{display:false}},
       scales:{
-        x:{ticks:{color:INK_TEXT, font:{family:'IBM Plex Mono',size:11}}, grid:{color:'rgba(26,36,48,0.08)'}},
+        x:{ticks:{color:INK_TEXT, font:{family:'IBM Plex Mono',size:11}}, grid:{color:'rgba(18,18,18,0.08)'}},
         y:{ticks:{color:INK_TEXT, font:{family:'Inter',size:12}}, grid:{display:false}}
       }}
   });
@@ -983,14 +984,14 @@ function renderTrendChart(pastKeys, selectedKey){
   trendChart = new Chart(canvas.getContext('2d'), {
     type:'line',
     data:{labels, datasets:[
-      {label:'Receitas', data:receitas, borderColor:'#4F7A62', backgroundColor:'transparent', tension:0.25, segment:{borderDash:segStyle}},
-      {label:'Despesas', data:despesas, borderColor:'#A34A2E', backgroundColor:'transparent', tension:0.25, segment:{borderDash:segStyle}},
-      {label:'Saldo corrente', data:saldos, borderColor:'#AD8626', backgroundColor:'transparent', tension:0.25, borderDash:[4,3]}
+      {label:'Receitas', data:receitas, borderColor:'#2ECC71', backgroundColor:'transparent', tension:0.25, segment:{borderDash:segStyle}},
+      {label:'Despesas', data:despesas, borderColor:'#E4577E', backgroundColor:'transparent', tension:0.25, segment:{borderDash:segStyle}},
+      {label:'Saldo corrente', data:saldos, borderColor:'#7B3FF2', backgroundColor:'transparent', tension:0.25, borderDash:[4,3]}
     ]},
     options:{ plugins:{legend:{labels:{color:INK_TEXT, font:{family:'Inter',size:11}}}},
       scales:{
-        x:{ticks:{color:INK_TEXT, font:{family:'Inter',size:10}}, grid:{color:'rgba(26,36,48,0.06)'}},
-        y:{ticks:{color:INK_TEXT, font:{family:'IBM Plex Mono',size:10}}, grid:{color:'rgba(26,36,48,0.08)'}}
+        x:{ticks:{color:INK_TEXT, font:{family:'Inter',size:10}}, grid:{color:'rgba(18,18,18,0.06)'}},
+        y:{ticks:{color:INK_TEXT, font:{family:'IBM Plex Mono',size:10}}, grid:{color:'rgba(18,18,18,0.08)'}}
       }}
   });
 }
@@ -1275,7 +1276,7 @@ function renderTripDetail(){
       data:{labels, datasets:[{data, backgroundColor:colors, borderRadius:4, barThickness:16}]},
       options:{ indexAxis:'y', plugins:{legend:{display:false}},
         scales:{
-          x:{ticks:{color:INK_TEXT, font:{family:'IBM Plex Mono',size:11}}, grid:{color:'rgba(26,36,48,0.08)'}},
+          x:{ticks:{color:INK_TEXT, font:{family:'IBM Plex Mono',size:11}}, grid:{color:'rgba(18,18,18,0.08)'}},
           y:{ticks:{color:INK_TEXT, font:{family:'Inter',size:12}}, grid:{display:false}}
         }}
     });
